@@ -1,0 +1,18 @@
+version: 1.0
+provider:
+  name: openfaas
+  gateway: http://127.0.0.1:8080
+functions:
+  make-task:
+    lang: golang-middleware
+    handler: ./make-task
+    image: bbeatty14/make-task:latest
+    build_args:
+      GO111MODULE: on
+    environment:
+      DB_USER: postgresadmin
+      DB_PASSWORD: admin123
+      DB_PORT: 30123
+      DB_HOST: 192.168.1.21
+      DB_NAME: postgresdb
+
