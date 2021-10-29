@@ -25,6 +25,8 @@ type Response struct {
 
 func Handle(w http.ResponseWriter, r *http.Request) {
 
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
 	if r.Method != http.MethodGet {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		w.Header().Set("Content-Type", "application/json")
