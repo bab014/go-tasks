@@ -23,6 +23,24 @@ type Response struct {
 	Data       interface{} `json:"data"`
 }
 
+var db *gorm.DB
+
+func init() {
+	DB_USER := os.Getenv("DB_USER")
+	DB_PASSWORD := os.Getenv("DB_PASSWORD")
+	DB_PORT := os.Getenv("DB_PORT")
+	DB_HOST := os.Getenv("DB_HOST")
+	DB_NAME := os.Getenv("DB_NAME")
+
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_PORT)
+
+	var err error
+	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		log.Println("Unable to connect to database")
+	}
+}
+
 func Handle(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != http.MethodPost {
@@ -58,19 +76,6 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte("Something went wrong"))
 		}
 		return
-	}
-
-	DB_USER := os.Getenv("DB_USER")
-	DB_PASSWORD := os.Getenv("DB_PASSWORD")
-	DB_PORT := os.Getenv("DB_PORT")
-	DB_HOST := os.Getenv("DB_HOST")
-	DB_NAME := os.Getenv("DB_NAME")
-
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_PORT)
-
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		log.Println("Unable to connect to database")
 	}
 
 	err = db.Create(&newTask).Error

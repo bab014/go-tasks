@@ -23,6 +23,24 @@ type Response struct {
 	Data       interface{} `json:"data"`
 }
 
+var db *gorm.DB
+
+func init() {
+	DB_USER := os.Getenv("DB_USER")
+	DB_PASSWORD := os.Getenv("DB_PASSWORD")
+	DB_PORT := os.Getenv("DB_PORT")
+	DB_HOST := os.Getenv("DB_HOST")
+	DB_NAME := os.Getenv("DB_NAME")
+
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_PORT)
+
+	var err error
+	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		log.Println("Unable to connect to database")
+	}
+}
+
 func Handle(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -44,24 +62,11 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	DB_USER := os.Getenv("DB_USER")
-	DB_PASSWORD := os.Getenv("DB_PASSWORD")
-	DB_PORT := os.Getenv("DB_PORT")
-	DB_HOST := os.Getenv("DB_HOST")
-	DB_NAME := os.Getenv("DB_NAME")
-
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_PORT)
-
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		log.Println("Unable to connect to database")
-	}
-
 	var tasks []Task
 
 	id, ok := r.URL.Query()["id"]
 	if !ok {
-		err = db.Find(&tasks).Error
+		err := db.Find(&tasks).Error
 		if err != nil {
 			w.WriteHeader(http.StatusMethodNotAllowed)
 			w.Header().Set("Content-Type", "application/json")
@@ -91,7 +96,7 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		var task Task
-		err = db.First(&task, id[0]).Error
+		err := db.First(&task, id[0]).Error
 		if err != nil {
 			w.WriteHeader(http.StatusMethodNotAllowed)
 			w.Header().Set("Content-Type", "application/json")
