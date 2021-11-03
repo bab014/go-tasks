@@ -20,6 +20,7 @@ type Task struct {
 type Response struct {
 	StatusCode int         `json:"status_code"`
 	Status     string      `json:"status"`
+	Message    interface{} `json:"message"`
 	Data       interface{} `json:"data"`
 }
 
@@ -84,10 +85,15 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// Getting MAX id for frontend app
+		var maxId int
+		db.Raw("SELECT MAX(id) FROM tasks").Scan(&maxId)
+
 		var res Response
 
 		res.StatusCode = http.StatusOK
 		res.Status = "Ok"
+		res.Message = maxId
 		res.Data = tasks
 
 		err = json.NewEncoder(w).Encode(&res)
@@ -113,10 +119,15 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 			}
 			return
 		}
+		// Getting MAX id for frontend app
+		var maxId int
+		db.Raw("SELECT MAX(id) FROM tasks").Scan(&maxId)
+
 		var res Response
 
 		res.StatusCode = http.StatusOK
 		res.Status = "Ok"
+		res.Message = maxId
 		res.Data = task
 
 		err = json.NewEncoder(w).Encode(&res)

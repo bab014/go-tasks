@@ -45,6 +45,15 @@ func init() {
 
 func Handle(w http.ResponseWriter, r *http.Request) {
 
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "*")
+
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
 	if r.Method != http.MethodPut {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		w.Header().Set("Content-Type", "application/json")
@@ -124,7 +133,9 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if updateTask.Complete {
-			task.Complete = updateTask.Complete
+			task.Complete = true
+		} else {
+			task.Complete = false
 		}
 
 		err = db.Save(&task).Error
@@ -146,7 +157,7 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 		}
 
 		res.StatusCode = http.StatusOK
-		res.Status = fmt.Sprintf("Task: %s updated", id)
+		res.Status = fmt.Sprintf("Task: %s updated", id[0])
 		res.Data = task
 
 		err = json.NewEncoder(w).Encode(&res)
